@@ -1,0 +1,44 @@
+
+# Maintainer: Max Mertens <mail at sheepstyle dot comeze dot com>
+
+pkgname=spheresim-git
+_gitname=spheresim
+pkgver=3.0.2
+pkgrel=1
+pkgdesc="Physical simulation of particle movements (server and clients)."
+arch=('i686' 'x86_64' 'armv7h')
+url="http://sourceforge.net/projects/spheresim/"
+license=('BSD 3-clause')
+depends=('qt5-base' 'mesa')
+makedepends=('git' 'cmake' 'eigen')
+options=()
+conflicts=('spheresim')
+provides=('spheresim')
+
+source=("${_gitname}::git+https://github.com/jellysheep/spheresim.git")
+
+md5sums=('SKIP')
+
+pkgver()
+{
+    cd "${srcdir}/${_gitname}"
+    cat VERSION
+}
+
+build()
+{
+    cd "${srcdir}/${_gitname}"
+    mkdir -p build
+    cd build
+    cmake ../ -DCMAKE_INSTALL_PREFIX:PATH=/usr -Wno-dev
+    CORE_COUNT="$(nproc)"
+    make -j"${CORE_COUNT}"
+}
+
+package()
+{
+    cd "${srcdir}/${_gitname}/build"
+    make DESTDIR="${pkgdir}" install
+    mkdir -p "${pkgdir}/usr/share/licenses/${pkgname}/"
+    install "${srcdir}/${_gitname}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/"
+}
